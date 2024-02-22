@@ -28,12 +28,14 @@ namespace Automatically_place_bets
         {
             var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Add("User-Agent", "PostmanRuntime/7.36.3");
             var response = await client.SendAsync(request);
+            
             response.EnsureSuccessStatusCode();
             if (response.Content != null)
             {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                return responseContent;
+                var resurl = response.RequestMessage.RequestUri.ToString();
+                return resurl;
             }
               return string.Empty;
 
