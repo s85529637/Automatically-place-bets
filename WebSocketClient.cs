@@ -1,3 +1,4 @@
+using Automatically_place_bets.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
@@ -8,9 +9,7 @@ using Websocket.Client;
 
 public class WebSocketClient : IWebSocketClient
 {
-    private ClientWebSocket webSocket = null;
-
-    public async Task ConnectAsync(string uri)
+    public async Task ConnectAsync(string uri, string LoginData)
     {
         var exitEvent = new ManualResetEvent(false);
 
@@ -18,13 +17,22 @@ public class WebSocketClient : IWebSocketClient
         client.ReconnectTimeout = TimeSpan.FromSeconds(30);
         client.ReconnectionHappened.Subscribe(info =>
             Log.Information($"Reconnection happened, type: {info.Type}"));
+        var intable = new Dictionary<string, string>
+        {
+            {"C","1000" },
+            {"LoginData",LoginData},
+            {"SI","GCBC20201102" },
+        };
+        client.Send(JsonConvert.SerializeObject(intable));
+
 
         var takslist = new List<Task>();
         client.MessageReceived.Select(msg => Observable.FromAsync(async () =>
              {
                  if (!string.IsNullOrEmpty(msg.Text))
                  {
-                     Console.WriteLine(msg.Text);
+                     //Console.WriteLine(msg.Text);
+                     MyQueue.queue.Enqueue(msg.Text);
                  }
 
                  await Task.Delay(500);
@@ -34,8 +42,8 @@ public class WebSocketClient : IWebSocketClient
 
         takslist.Add(client.Start());
 
-
-        var message = new Dictionary<string, string>
+        //¤ß¸õ
+        var heartbeatmessage = new Dictionary<string, string>
                 {
                     {"C","1003" },
                     {"SI","9999" },
@@ -47,7 +55,7 @@ public class WebSocketClient : IWebSocketClient
 
             while (!token.IsCancellationRequested)
             {
-                client.Send(JsonConvert.SerializeObject(message));
+                client.Send(JsonConvert.SerializeObject(heartbeatmessage));
                 await Task.Delay(TimeSpan.FromSeconds(5), token);
             }
         }, token
