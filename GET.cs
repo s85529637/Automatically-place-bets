@@ -8,20 +8,20 @@ namespace Automatically_place_bets
 {
     public class GET
     {
-        public async Task<string> GetAsync(string url)
+        public async Task<string> GetAsync(string url, Dictionary<string, string> headers)
         {
             using (var client = new HttpClient())
             {
-                var response = await client.GetAsync(url);
-
-                if (response.Content != null)
+                foreach (var header in headers)
                 {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    return responseContent;
+                    client.DefaultRequestHeaders.Add(header.Key, header.Value);
                 }
-            }
 
-            return string.Empty;
+                var response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                return await response.Content.ReadAsStringAsync();
+            }
         }
 
         public async Task<string> GetSendAsync(string url)
