@@ -58,7 +58,7 @@ namespace Automatically_place_bets
                     { "device", "DESKTOP" },
                     { "lang", "zh-tw" },
                     { "lobbyURL", "https://ts.bacctest.com/close" },
-                    { "Desk","baccarat"}
+                    { "deskid","1201"},
                 };
 
                 Dictionary<string, string> headers = new Dictionary<string, string>
